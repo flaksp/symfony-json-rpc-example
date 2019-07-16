@@ -5,25 +5,43 @@ namespace App\JsonRpc;
 
 
 use App\JsonRpc\Response\AbstractResponse;
-use App\JsonRpc\Response\BatchResponse;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class ProcedureCallHandler
 {
+    /**
+     * @var MessageBusInterface
+     */
+    private $messageBus;
+
+    public function __construct(
+        MessageBusInterface $messageBus
+    ) {
+        $this->messageBus = $messageBus;
+    }
+
     public function handle(
         ProcedureCall $procedureCall
-    ): AbstractResponse
-    {
+    ): AbstractResponse {
+        switch ($procedureCall->getMethod()) {
+            case 'sum':
+                $this->messageBus->dispatch()
+        }
+
 
     }
 
+    /**
+     * @param ProcedureCall[] $procedureCalls
+     * @return AbstractResponse[]
+     */
     public function handleBatch(
-        BatchProcedureCall $batchProcedureCall
-    ): BatchResponse
-    {
+        array $procedureCalls
+    ): array {
         $responses = array_map(function (ProcedureCall $procedureCall): AbstractResponse {
             return $this->handle($procedureCall);
-        }, $batchProcedureCall->getProcedureCalls());
+        }, $procedureCalls);
 
-        return new BatchResponse($responses);
+        return $responses;
     }
 }
