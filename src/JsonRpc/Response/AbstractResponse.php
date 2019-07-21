@@ -1,23 +1,23 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\JsonRpc\Response;
 
-
 abstract class AbstractResponse
 {
-    /**
-     * @var string
-     */
-    private $version;
-
     /**
      * @var int|string|null
      */
     private $id;
 
     /**
-     * @param string|int|null $id
+     * @var string
+     */
+    private $version;
+
+    /**
+     * @param int|string|null $id
      */
     public function __construct(
         string $version,
@@ -27,16 +27,16 @@ abstract class AbstractResponse
         $this->id = $id;
     }
 
-    public function getVersion(): string
-    {
-        return $this->version;
-    }
-
     /**
      * @return int|string|null
      */
     public function getId()
     {
         return $this->id;
+    }
+
+    public function getVersion(): string
+    {
+        return $this->version;
     }
 }

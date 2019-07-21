@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\Validator;
-
 
 class JsonPointer
 {
@@ -20,14 +20,6 @@ class JsonPointer
         $this->propertyPath = $propertyPath;
     }
 
-    /**
-     * @return (string|int)[] $propertyPath
-     */
-    public function getPropertyPath(): array
-    {
-        return $this->propertyPath;
-    }
-
     public function getPointer(): string
     {
         $pointer = '#';
@@ -37,5 +29,13 @@ class JsonPointer
         }
 
         return $pointer;
+    }
+
+    /**
+     * @return (string|int)[] $propertyPath
+     */
+    public function getPropertyPath(): array
+    {
+        return $this->propertyPath;
     }
 }

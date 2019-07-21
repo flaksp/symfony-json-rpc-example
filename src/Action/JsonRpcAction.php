@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\Action;
 
@@ -16,6 +17,11 @@ use Symfony\Component\Serializer\SerializerInterface;
 class JsonRpcAction
 {
     /**
+     * @var ProcedureCallHandler
+     */
+    private $procedureCallHandler;
+
+    /**
      * @var RequestStack
      */
     private $requestStack;
@@ -24,11 +30,6 @@ class JsonRpcAction
      * @var SerializerInterface
      */
     private $serializer;
-
-    /**
-     * @var ProcedureCallHandler
-     */
-    private $procedureCallHandler;
 
     public function __construct(
         RequestStack $requestStack,

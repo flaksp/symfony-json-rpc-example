@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\JsonRpc;
-
 
 use App\Message\Sum;
 
@@ -24,10 +24,10 @@ class JsonRpcMethod
     }
 
     public static function getMessageClassByMethodName(
-        JsonRpcMethod $method
+        self $method
     ): ?string {
         $mapping = [
-            'sum' => Sum::class
+            'sum' => Sum::class,
         ];
 
         return $mapping[$method->getName()] ?? null;

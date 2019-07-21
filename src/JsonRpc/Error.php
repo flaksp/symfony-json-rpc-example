@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\JsonRpc;
-
 
 class Error
 {
@@ -12,14 +12,14 @@ class Error
     private $code;
 
     /**
-     * @var string
-     */
-    private $message;
-
-    /**
      * @var mixed
      */
     private $data;
+
+    /**
+     * @var string
+     */
+    private $message;
 
     /**
      * @param mixed $data
@@ -39,16 +39,16 @@ class Error
         return $this->code;
     }
 
-    public function getMessage(): string
-    {
-        return $this->message;
-    }
-
     /**
      * @return mixed
      */
     public function getData()
     {
         return $this->data;
+    }
+
+    public function getMessage(): string
+    {
+        return $this->message;
     }
 }

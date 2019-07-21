@@ -1,9 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\Validator\ConstraintViolation;
-
-
 
 use App\Validator\ConstraintViolationParameter;
 use App\Validator\JsonPointer;
@@ -19,7 +18,7 @@ class WrongPropertyType implements ConstraintViolationInterface
     /**
      * @var string[]
      */
-    private $propertyPath;
+    private $allowedTypes;
 
     /**
      * @var string
@@ -27,14 +26,14 @@ class WrongPropertyType implements ConstraintViolationInterface
     private $givenType;
 
     /**
-     * @var string[]
-     */
-    private $allowedTypes;
-
-    /**
      * @var ConstraintViolationParameter[]
      */
     private $parameters;
+
+    /**
+     * @var string[]
+     */
+    private $propertyPath;
 
     /**
      * @param string[] $propertyPath
@@ -56,13 +55,23 @@ class WrongPropertyType implements ConstraintViolationInterface
             new ConstraintViolationParameter(
                 'allowedTypes',
                 $this->allowedTypes
-            )
+            ),
         ];
     }
 
     public static function getType(): string
     {
         return self::TYPE;
+    }
+
+    public function getDescription(): string
+    {
+        return sprintf(
+            'Property "%s" is %s type, but only types %s are allowed.',
+            $this->getPointer(),
+            $this->givenType,
+            implode(', ', $this->allowedTypes)
+        );
     }
 
     /**
@@ -76,15 +85,5 @@ class WrongPropertyType implements ConstraintViolationInterface
     public function getPointer(): JsonPointer
     {
         return new JsonPointer($this->propertyPath);
-    }
-
-    public function getDescription(): string
-    {
-        return sprintf(
-            'Property "%s" is %s type, but only types %s are allowed.',
-            $this->getPointer(),
-            $this->givenType,
-            implode(', ', $this->allowedTypes)
-        );
     }
 }

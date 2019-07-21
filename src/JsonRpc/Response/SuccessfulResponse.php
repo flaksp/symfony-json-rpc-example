@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\JsonRpc\Response;
-
 
 class SuccessfulResponse extends AbstractResponse
 {
@@ -12,8 +12,8 @@ class SuccessfulResponse extends AbstractResponse
     private $result;
 
     /**
-     * @param string|int|null $id
-     * @param mixed $result
+     * @param int|string|null $id
+     * @param mixed           $result
      */
     public function __construct(
         string $version,

@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\JsonRpc\Response;
-
 
 use App\JsonRpc\Error;
 
@@ -14,7 +14,7 @@ class ErrorResponse extends AbstractResponse
     private $error;
 
     /**
-     * @param string|int|null $id
+     * @param int|string|null $id
      */
     public function __construct(
         string $version,

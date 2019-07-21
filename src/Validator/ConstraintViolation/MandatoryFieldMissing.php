@@ -1,9 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\Validator\ConstraintViolation;
-
-
 
 use App\Validator\ConstraintViolationParameter;
 use App\Validator\JsonPointer;
@@ -35,6 +34,14 @@ class MandatoryFieldMissing implements ConstraintViolationInterface
         return self::TYPE;
     }
 
+    public function getDescription(): string
+    {
+        return sprintf(
+            'Property "%s" is mandatory, but it\'s missing. Even if field is nullable it should be presented in request payload.',
+            $this->getPointer()
+        );
+    }
+
     /**
      * @return ConstraintViolationParameter[]
      */
@@ -46,13 +53,5 @@ class MandatoryFieldMissing implements ConstraintViolationInterface
     public function getPointer(): JsonPointer
     {
         return new JsonPointer($this->propertyPath);
-    }
-
-    public function getDescription(): string
-    {
-        return sprintf(
-            'Property "%s" is mandatory, but it\'s missing. Even if field is nullable it should be presented in request payload.',
-            $this->getPointer()
-        );
     }
 }

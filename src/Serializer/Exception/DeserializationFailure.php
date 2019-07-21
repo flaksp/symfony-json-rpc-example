@@ -1,12 +1,11 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\Serializer\Exception;
 
-
 use App\Validator\ConstraintViolation\ConstraintViolationInterface;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
-use Throwable;
 
 class DeserializationFailure extends UnexpectedValueException
 {

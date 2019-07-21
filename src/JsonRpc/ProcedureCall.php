@@ -1,17 +1,17 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\JsonRpc;
-
 
 use InvalidArgumentException;
 
 class ProcedureCall
 {
     /**
-     * @var JsonRpcVersion
+     * @var int|string|null
      */
-    private $version;
+    private $id;
 
     /**
      * @var string
@@ -24,13 +24,13 @@ class ProcedureCall
     private $parameters;
 
     /**
-     * @var string|int|null
+     * @var JsonRpcVersion
      */
-    private $id;
+    private $version;
 
     /**
-     * @param mixed[] $parameters
-     * @param string|int|null $id
+     * @param mixed[]         $parameters
+     * @param int|string|null $id
      */
     public function __construct(
         JsonRpcVersion $version,
@@ -43,7 +43,7 @@ class ProcedureCall
         $this->parameters = $parameters;
         $this->id = $id;
 
-        if (!is_string($this->id) && !is_int($this->id) && !is_null($this->id)) {
+        if (!is_string($this->id) && !is_int($this->id) && $this->id !== null) {
             throw new InvalidArgumentException(sprintf(
                 'Procedure Call ID should be string, number or null, but "%s" type given',
                 gettype($this->id)
@@ -51,9 +51,12 @@ class ProcedureCall
         }
     }
 
-    public function getVersion(): JsonRpcVersion
+    /**
+     * @return int|string|null
+     */
+    public function getId()
     {
-        return $this->version;
+        return $this->id;
     }
 
     public function getMethod(): string
@@ -69,12 +72,8 @@ class ProcedureCall
         return $this->parameters;
     }
 
-    /**
-     * @return int|string|null
-     */
-    public function getId()
+    public function getVersion(): JsonRpcVersion
     {
-        return $this->id;
+        return $this->version;
     }
-
 }
