@@ -9,7 +9,7 @@ use InvalidArgumentException;
 class ProcedureCall
 {
     /**
-     * @var string
+     * @var JsonRpcVersion
      */
     private $version;
 
@@ -33,7 +33,7 @@ class ProcedureCall
      * @param string|int|null $id
      */
     public function __construct(
-        string $version,
+        JsonRpcVersion $version,
         string $method,
         array $parameters,
         $id
@@ -43,10 +43,15 @@ class ProcedureCall
         $this->parameters = $parameters;
         $this->id = $id;
 
-        $this->validate();
+        if (!is_string($this->id) && !is_int($this->id) && !is_null($this->id)) {
+            throw new InvalidArgumentException(sprintf(
+                'Procedure Call ID should be string, number or null, but "%s" type given',
+                gettype($this->id)
+            ));
+        }
     }
 
-    public function getVersion(): string
+    public function getVersion(): JsonRpcVersion
     {
         return $this->version;
     }
@@ -70,16 +75,6 @@ class ProcedureCall
     public function getId()
     {
         return $this->id;
-    }
-
-    private function validate(): void
-    {
-        if (!is_string($this->id) && !is_int($this->id) && !is_null($this->id)) {
-            throw new InvalidArgumentException(sprintf(
-                'Procedure Call ID should be string, number or null, but "%s" type given',
-                gettype($this->id)
-            ));
-        }
     }
 
 }

@@ -9,12 +9,13 @@ use App\Validator\ConstraintViolationParameter;
 use App\Validator\JsonPointer;
 
 /**
- * This error appears when field should be present in
- * the object but it is missing.
+ * This error appears when others constraint violations
+ * are not relevant. Think about this like about violation
+ * with custom error message.
  */
-class MandatoryFieldMissing implements ConstraintViolationInterface
+class ValueIsNotValid implements ConstraintViolationInterface
 {
-    public const TYPE = 'mandatory_field_missing';
+    public const TYPE = 'value_is_not_valid';
 
     /**
      * @var string[]
@@ -22,12 +23,19 @@ class MandatoryFieldMissing implements ConstraintViolationInterface
     private $propertyPath;
 
     /**
+     * @var string
+     */
+    private $message;
+
+    /**
      * @param string[] $propertyPath
      */
     public function __construct(
-        array $propertyPath
+        array $propertyPath,
+        string $message
     ) {
         $this->propertyPath = $propertyPath;
+        $this->message = $message;
     }
 
     public static function getType(): string
@@ -51,8 +59,9 @@ class MandatoryFieldMissing implements ConstraintViolationInterface
     public function getDescription(): string
     {
         return sprintf(
-            'Property "%s" is mandatory, but it\'s missing. Even if field is nullable it should be presented in request payload.',
-            $this->getPointer()
+            'Property "%s" is not valid. %s',
+            $this->getPointer(),
+            $this->message
         );
     }
 }

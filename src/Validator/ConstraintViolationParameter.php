@@ -17,7 +17,7 @@ class ConstraintViolationParameter
     private $value;
 
     /**
-     * @param string|int $value
+     * @param string|int|(string|int)[] $value
      */
     public function __construct(
         string $name,

@@ -25,7 +25,7 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
-class ProcedureCallSerializer implements DenormalizerInterface, DenormalizerAwareInterface, CacheableSupportsMethodInterface
+class JsonRpcVersionSerializer implements DenormalizerInterface, DenormalizerAwareInterface, CacheableSupportsMethodInterface
 {
     use DenormalizerAwareTrait;
 
@@ -34,12 +34,36 @@ class ProcedureCallSerializer implements DenormalizerInterface, DenormalizerAwar
         return __CLASS__ === get_class($this);
     }
 
-    public function denormalize($data, $class, $format = null, array $context = []): ProcedureCall
+    public function denormalize($data, $class, $format = null, array $context = []): JsonRpcVersion
     {
         if ($this->supportsDenormalization($data, $class, $format) === false) {
             throw new LogicException();
         }
 
+        if (is_string($data) === false) {
+            $violations[] = new WrongPropertyType(
+                $context['propertyPath'],
+                gettype($data),
+                ['string']
+            );
+        }
+
+        if ($data !== '2.0') {
+            $violations[] = new ValueIsNotValid(
+                $context['propertyPath'],
+                'JSON RPC version should be explicitly specified as described in specification: https://www.jsonrpc.org/specification. At this moment server supports only version "2.0".'
+            );
+        }
+
+        if (count($violations) > 0) {
+            throw new DeserializationFailure($violations);
+        }
+
+        return new JsonRpcVersion($data);
+    }
+
+    private function validate($data): void
+    {
         $violations = [];
 
         if (array_key_exists('jsonrpc', $data) === false) {
@@ -47,18 +71,13 @@ class ProcedureCallSerializer implements DenormalizerInterface, DenormalizerAwar
                 ['jsonrpc']
             );
         } else {
-            try {
-                $data['jsonrpc'] = $this->denormalizer->denormalize(
-                    $data['jsonrpc'],
-                    JsonRpcVersion::class,
-                    $format,
-                    [
-                        'propertyPath' => $context['propertyPath'] + ['jsonrpc']
-                    ]
-                );
-            } catch (DeserializationFailure $e) {
-                $violations = $violations + $e->getConstraintViolations();
-            }
+
+        }
+
+        if ($data['jsonrpc'] !== '2.0') {
+            throw new InvalidRequestException(
+                'Field "jsonrpc" should contain JSON RPC specification version number. Server supports only version "2.0".'
+            );
         }
 
         if (array_key_exists('method', $data) === false) {
@@ -84,20 +103,11 @@ class ProcedureCallSerializer implements DenormalizerInterface, DenormalizerAwar
             $data['params'] = [];
         }
 
-        if (count($violations) > 0) {
-            throw new DeserializationFailure($violations);
-        }
 
-        return new ProcedureCall(
-            $data['jsonrpc'],
-            $data['method'],
-            $data['params'],
-            $data['id']
-        );
     }
 
     public function supportsDenormalization($data, $type, $format = null)
     {
-        return $type === ProcedureCallHandler::class && $format === JsonEncoder::FORMAT;
+        return $type === JsonRpcVersion::class;
     }
 }
