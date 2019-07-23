@@ -18,19 +18,19 @@ class JsonRpcMethod
     ) {
         $this->name = $name;
 
-        if (self::getMessageClassByMethodName($this) === null) {
+        if (self::getMessageClassByMethodName($name) === null) {
             throw new \InvalidArgumentException('Method does not exist');
         }
     }
 
     public static function getMessageClassByMethodName(
-        self $method
+        string $method
     ): ?string {
         $mapping = [
             'sum' => Sum::class,
         ];
 
-        return $mapping[$method->getName()] ?? null;
+        return $mapping[$method] ?? null;
     }
 
     public function getName(): string

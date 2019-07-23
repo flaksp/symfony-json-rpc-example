@@ -67,8 +67,8 @@ class WrongPropertyType implements ConstraintViolationInterface
     public function getDescription(): string
     {
         return sprintf(
-            'Property "%s" is %s type, but only types %s are allowed.',
-            $this->getPointer(),
+            'Property "%s" is %s type, but only following types are allowed: %s.',
+            $this->getPointer()->getPointer(),
             $this->givenType,
             implode(', ', $this->allowedTypes)
         );

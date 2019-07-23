@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Serializer;
 
-use App\JsonRpc\Exception\InvalidRequestException;
+use App\JsonRpc\JsonRpcCallId;
+use App\JsonRpc\JsonRpcMethod;
 use App\JsonRpc\JsonRpcVersion;
 use App\JsonRpc\ProcedureCall;
-use App\JsonRpc\ProcedureCallHandler;
 use App\Serializer\Exception\DeserializationFailure;
 use App\Validator\ConstraintViolation\MandatoryFieldMissing;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -49,22 +49,39 @@ class ProcedureCallSerializer implements DenormalizerInterface, DenormalizerAwar
         }
 
         if (array_key_exists('method', $data) === false) {
-            throw new InvalidRequestException(
-                'Your request missing mandatory field "method".'
+            $violations[] = new MandatoryFieldMissing(
+                ['method']
             );
-        }
-
-        if (is_string($data['method']) === false) {
-            throw new InvalidRequestException(sprintf(
-                'Field "method" should contain string. You have send "%s" type in that field.',
-                gettype($data['jsonrpc'])
-            ));
+        } else {
+            try {
+                $data['method'] = $this->denormalizer->denormalize(
+                    $data['method'],
+                    JsonRpcMethod::class,
+                    $format,
+                    [
+                        'propertyPath' => $context['propertyPath'] + ['method'],
+                    ]
+                );
+            } catch (DeserializationFailure $e) {
+                $violations = $violations + $e->getConstraintViolations();
+            }
         }
 
         if (array_key_exists('id', $data) === false) {
-            throw new InvalidRequestException(
-                'Your request missing mandatory field "id".'
-            );
+            $data['id'] = null;
+        } else {
+            try {
+                $data['id'] = $this->denormalizer->denormalize(
+                    $data['id'],
+                    JsonRpcCallId::class,
+                    $format,
+                    [
+                        'propertyPath' => $context['propertyPath'] + ['id'],
+                    ]
+                );
+            } catch (DeserializationFailure $e) {
+                $violations = $violations + $e->getConstraintViolations();
+            }
         }
 
         if (array_key_exists('params', $data) === false) {
@@ -90,6 +107,6 @@ class ProcedureCallSerializer implements DenormalizerInterface, DenormalizerAwar
 
     public function supportsDenormalization($data, $type, $format = null)
     {
-        return $type === ProcedureCallHandler::class && $format === JsonEncoder::FORMAT;
+        return $type === ProcedureCall::class && $format === JsonEncoder::FORMAT;
     }
 }

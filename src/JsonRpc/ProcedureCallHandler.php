@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\JsonRpc;
-
 
 use App\JsonRpc\Response\AbstractResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -23,16 +23,15 @@ class ProcedureCallHandler
     public function handle(
         ProcedureCall $procedureCall
     ): AbstractResponse {
-        switch ($procedureCall->getMethod()) {
-            case 'sum':
-                $this->messageBus->dispatch()
-        }
-
-
+//        switch ($procedureCall->getMethod()) {
+//            case 'sum':
+//                $this->messageBus->dispatch()
+//        }
     }
 
     /**
      * @param ProcedureCall[] $procedureCalls
+     *
      * @return AbstractResponse[]
      */
     public function handleBatch(

@@ -14,6 +14,9 @@ class DeserializationFailure extends UnexpectedValueException
      */
     private $constraintViolations;
 
+    /**
+     * @param ConstraintViolationInterface[]
+     */
     public function __construct(
         array $constraintViolations
     ) {
@@ -27,7 +30,7 @@ class DeserializationFailure extends UnexpectedValueException
                 $violationIndex++,
                 $violation->getDescription()
             );
-        }, '');
+        }, "\n");
 
         parent::__construct($message);
     }

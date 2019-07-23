@@ -46,7 +46,7 @@ class ValueIsNotValid implements ConstraintViolationInterface
     {
         return sprintf(
             'Property "%s" is not valid. %s',
-            $this->getPointer(),
+            $this->getPointer()->getPointer(),
             $this->message
         );
     }

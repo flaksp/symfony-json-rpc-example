@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Serializer;
 
-use App\JsonRpc\JsonRpcVersion;
+use App\JsonRpc\JsonRpcMethod;
 use App\Serializer\Exception\DeserializationFailure;
 use App\Validator\ConstraintViolation\ConstraintViolationInterface;
 use App\Validator\ConstraintViolation\ValueIsNotValid;
@@ -15,11 +15,11 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
-class JsonRpcVersionSerializer implements DenormalizerInterface, DenormalizerAwareInterface, CacheableSupportsMethodInterface
+class JsonRpcMethodSerializer implements DenormalizerInterface, DenormalizerAwareInterface, CacheableSupportsMethodInterface
 {
     use DenormalizerAwareTrait;
 
-    public function denormalize($data, $class, $format = null, array $context = []): JsonRpcVersion
+    public function denormalize($data, $class, $format = null, array $context = []): JsonRpcMethod
     {
         if ($this->supportsDenormalization($data, $class, $format) === false) {
             throw new LogicException();
@@ -34,20 +34,20 @@ class JsonRpcVersionSerializer implements DenormalizerInterface, DenormalizerAwa
                 gettype($data),
                 ['string']
             );
-        }
-
-        if ($data !== '2.0') {
-            $violations[] = new ValueIsNotValid(
-                $context['propertyPath'],
-                'JSON RPC version should be explicitly specified as described in specification: https://www.jsonrpc.org/specification. At this moment server supports only version "2.0".'
-            );
+        } else {
+            if (JsonRpcMethod::getMessageClassByMethodName($data) === null) {
+                $violations[] = new ValueIsNotValid(
+                    $context['propertyPath'],
+                    'JSON RPC method with given name does not exist.'
+                );
+            }
         }
 
         if (count($violations) > 0) {
             throw new DeserializationFailure($violations);
         }
 
-        return new JsonRpcVersion($data);
+        return new JsonRpcMethod($data);
     }
 
     public function hasCacheableSupportsMethod(): bool
@@ -57,6 +57,6 @@ class JsonRpcVersionSerializer implements DenormalizerInterface, DenormalizerAwa
 
     public function supportsDenormalization($data, $type, $format = null)
     {
-        return $type === JsonRpcVersion::class;
+        return $type === JsonRpcMethod::class;
     }
 }

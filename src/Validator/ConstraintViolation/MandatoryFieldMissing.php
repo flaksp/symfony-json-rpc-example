@@ -38,7 +38,7 @@ class MandatoryFieldMissing implements ConstraintViolationInterface
     {
         return sprintf(
             'Property "%s" is mandatory, but it\'s missing. Even if field is nullable it should be presented in request payload.',
-            $this->getPointer()
+            $this->getPointer()->getPointer()
         );
     }
 
