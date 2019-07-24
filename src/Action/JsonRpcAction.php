@@ -11,11 +11,14 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
 use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class JsonRpcAction
 {
+    public const ROUTE = __CLASS__;
+
     /**
      * @var ProcedureCallHandler
      */
@@ -41,6 +44,9 @@ class JsonRpcAction
         $this->procedureCallHandler = $procedureCallHandler;
     }
 
+    /**
+     * @Route("/jsonrpc", name=JsonRpcAction::ROUTE, methods={"POST"})
+     */
     public function __invoke(): Response
     {
         $request = $this->requestStack->getCurrentRequest();
