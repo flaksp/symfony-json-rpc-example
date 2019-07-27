@@ -6,6 +6,9 @@ namespace App\JsonRpc;
 
 class Error
 {
+    public const CODE_INTERNAL_ERROR = -32603;
+    public const CODE_PARSE_ERROR = -32700;
+
     /**
      * @var int
      */

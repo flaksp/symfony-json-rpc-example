@@ -1,0 +1,19 @@
+services:
+  _defaults:
+    autowire: false
+    autoconfigure: false
+    public: false
+
+  App\EventListener\ExceptionToErrorConverter:
+    arguments:
+    - '@App\RequestFactory'
+    - '@App\ApiProblemResponder'
+    tags:
+    - { name: kernel.event_listener, event: kernel.exception, priority: 200 }
+
+  App\EventListener\ExceptionToInternalServerErrorConverter:
+    arguments:
+    - '@logger'
+    - '@App\ApiProblemResponder'
+    tags:
+    - { name: kernel.event_listener, event: kernel.exception, priority: 100 }

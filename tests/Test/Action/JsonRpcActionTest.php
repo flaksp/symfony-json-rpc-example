@@ -16,7 +16,10 @@ class JsonRpcActionTest extends WebTestCase
             'POST',
             '/jsonrpc',
             [],
-            [],
+            [
+                'HTTP_Content-Type' => 'application/json',
+                'HTTP_Accept' => 'application/json',
+            ],
             [],
             json_encode([
                 'jsonrpc' => '2.0',

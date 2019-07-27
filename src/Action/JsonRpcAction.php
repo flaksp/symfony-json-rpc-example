@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Action;
 
-use App\JsonRpc\Exception\ParseErrorException;
+use App\JsonRpc\Error;
 use App\JsonRpc\ProcedureCall;
 use App\JsonRpc\ProcedureCallHandler;
+use App\JsonRpc\Response\ErrorResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
@@ -66,7 +67,24 @@ class JsonRpcAction
         $json = $request->getContent();
 
         if ($json === '') {
-            throw new ParseErrorException();
+            return new Response(
+                $this->serializer->serialize(
+                    new ErrorResponse(
+                        '2.0',
+                        null,
+                        new Error(
+                            Error::CODE_PARSE_ERROR,
+                            'Parse error',
+                            null
+                        )
+                    ),
+                    JsonEncoder::FORMAT
+                ),
+                Response::HTTP_OK,
+                [
+                    'Content-Type' => 'application/json',
+                ]
+            );
         }
 
         /** @var ProcedureCall|ProcedureCall[] $procedureCall */
