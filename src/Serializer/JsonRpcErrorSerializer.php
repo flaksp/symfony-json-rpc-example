@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Serializer;
 
-use App\ApiProblem\ApiProblem;
+use App\JsonRpc\Error;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
@@ -12,7 +12,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class ApiProblemSerializer implements NormalizerInterface, NormalizerAwareInterface, CacheableSupportsMethodInterface
+class JsonRpcErrorSerializer implements NormalizerInterface, NormalizerAwareInterface, CacheableSupportsMethodInterface
 {
     use NormalizerAwareTrait;
 
@@ -22,7 +22,7 @@ class ApiProblemSerializer implements NormalizerInterface, NormalizerAwareInterf
     }
 
     /**
-     * @param ApiProblem $object
+     * @param Error      $object
      * @param mixed|null $format
      */
     public function normalize($object, $format = null, array $context = []): array
@@ -31,17 +31,24 @@ class ApiProblemSerializer implements NormalizerInterface, NormalizerAwareInterf
             throw new InvalidArgumentException();
         }
 
-        return [
-            'type' => $object->getType(),
-            'detail' => $object->getDetail(),
-            'status' => $object->getStatus(),
-            'title' => $object->getTitle(),
-            'instance' => $object->getInstance(),
+        $schema = [
+            'code' => $object->getCode(),
+            'message' => $object->getMessage(),
         ];
+
+        if ($object->getData() !== null) {
+            $schema['data'] = $this->normalizer->normalize(
+                $object->getData(),
+                $format,
+                $context
+            );
+        }
+
+        return $schema;
     }
 
     public function supportsNormalization($data, $format = null): bool
     {
-        return $data instanceof ApiProblem && $format === JsonEncoder::FORMAT;
+        return $data instanceof Error && $format === JsonEncoder::FORMAT;
     }
 }

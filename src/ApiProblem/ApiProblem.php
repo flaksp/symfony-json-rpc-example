@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\ValueObject\ApiProblem;
+namespace App\ApiProblem;
 
 use Symfony\Component\HttpFoundation\Response;
 

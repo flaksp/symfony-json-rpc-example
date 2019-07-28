@@ -6,14 +6,13 @@ services:
 
   App\EventListener\ExceptionToErrorConverter:
     arguments:
-    - '@App\RequestFactory'
-    - '@App\ApiProblemResponder'
+    - '@serializer'
     tags:
     - { name: kernel.event_listener, event: kernel.exception, priority: 200 }
 
   App\EventListener\ExceptionToInternalServerErrorConverter:
     arguments:
     - '@logger'
-    - '@App\ApiProblemResponder'
+    - '@serializer'
     tags:
     - { name: kernel.event_listener, event: kernel.exception, priority: 100 }

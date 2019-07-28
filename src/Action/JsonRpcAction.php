@@ -37,12 +37,12 @@ class JsonRpcAction
 
     public function __construct(
         RequestStack $requestStack,
-        SerializerInterface $serializer,
-        ProcedureCallHandler $procedureCallHandler
+        SerializerInterface $serializer
+//        ProcedureCallHandler $procedureCallHandler
     ) {
         $this->requestStack = $requestStack;
         $this->serializer = $serializer;
-        $this->procedureCallHandler = $procedureCallHandler;
+//        $this->procedureCallHandler = $procedureCallHandler;
     }
 
     /**
