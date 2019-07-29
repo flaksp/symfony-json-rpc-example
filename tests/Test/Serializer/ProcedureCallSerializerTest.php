@@ -11,6 +11,9 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class ProcedureCallSerializerTest extends KernelTestCase
 {
+    /**
+     * @group jsonrpc
+     */
     public function testSuccessfulDenormalization(): void
     {
         static::bootKernel();

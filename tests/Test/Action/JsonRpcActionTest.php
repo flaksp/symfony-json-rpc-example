@@ -10,6 +10,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class JsonRpcActionTest extends WebTestCase
 {
+    /**
+     * @group apiproblem
+     * @group jsonrpc
+     */
     public function testMissingAcceptHeader(): void
     {
         $client = static::createClient();
@@ -55,6 +59,10 @@ class JsonRpcActionTest extends WebTestCase
         );
     }
 
+    /**
+     * @group apiproblem
+     * @group jsonrpc
+     */
     public function testMissingContentTypeHeader(): void
     {
         $client = static::createClient();
@@ -100,6 +108,9 @@ class JsonRpcActionTest extends WebTestCase
         );
     }
 
+    /**
+     * @group jsonrpc
+     */
     public function testParseErrorJsonRpcError(): void
     {
         $client = static::createClient();
@@ -139,6 +150,9 @@ class JsonRpcActionTest extends WebTestCase
         );
     }
 
+    /**
+     * @group jsonrpc
+     */
     public function testSuccessfulRequest(): void
     {
         $client = static::createClient();
@@ -183,6 +197,10 @@ class JsonRpcActionTest extends WebTestCase
         );
     }
 
+    /**
+     * @group apiproblem
+     * @group jsonrpc
+     */
     public function testWrongAcceptHeader(): void
     {
         $client = static::createClient();
@@ -229,6 +247,10 @@ class JsonRpcActionTest extends WebTestCase
         );
     }
 
+    /**
+     * @group apiproblem
+     * @group jsonrpc
+     */
     public function testWrongContentTypeHeader(): void
     {
         $client = static::createClient();
