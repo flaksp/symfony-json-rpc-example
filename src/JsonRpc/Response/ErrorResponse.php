@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\JsonRpc\Response;
 
 use App\JsonRpc\Error;
+use App\JsonRpc\JsonRpcCallId;
+use App\JsonRpc\JsonRpcVersion;
 
 class ErrorResponse extends AbstractResponse
 {
@@ -13,12 +15,9 @@ class ErrorResponse extends AbstractResponse
      */
     private $error;
 
-    /**
-     * @param int|string|null $id
-     */
     public function __construct(
-        string $version,
-        $id,
+        JsonRpcVersion $version,
+        ?JsonRpcCallId $id,
         Error $error
     ) {
         $this->error = $error;

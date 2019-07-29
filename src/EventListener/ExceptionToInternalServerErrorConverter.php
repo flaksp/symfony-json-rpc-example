@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\EventListener;
 
 use App\JsonRpc\Error;
+use App\JsonRpc\JsonRpcVersion;
 use App\JsonRpc\Response\ErrorResponse;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -37,7 +38,7 @@ class ExceptionToInternalServerErrorConverter
     {
         $event->setResponse(new Response(
             $this->serializer->serialize(new ErrorResponse(
-                '2.0',
+                new JsonRpcVersion('2.0'),
                 null,
                 new Error(
                     Error::CODE_INTERNAL_ERROR,

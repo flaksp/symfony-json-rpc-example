@@ -172,6 +172,15 @@ class JsonRpcActionTest extends WebTestCase
             'application/json',
             $client->getResponse()->headers->get('Content-Type')
         );
+
+        self::assertJsonStringEqualsJsonString(
+            json_encode([
+                'jsonrpc' => '2.0',
+                'id' => 1,
+                'result' => 3,
+            ]),
+            $client->getResponse()->getContent()
+        );
     }
 
     public function testWrongAcceptHeader(): void

@@ -1,0 +1,10 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: false
+    public: false
+    tags:
+    - { name: messenger.message_handler }
+
+  App\MessageHandler\:
+    resource: '%kernel.project_dir%/src/MessageHandler/'

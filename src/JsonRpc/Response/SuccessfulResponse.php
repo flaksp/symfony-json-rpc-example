@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\JsonRpc\Response;
 
+use App\JsonRpc\JsonRpcCallId;
+use App\JsonRpc\JsonRpcVersion;
+
 class SuccessfulResponse extends AbstractResponse
 {
     /**
@@ -12,12 +15,11 @@ class SuccessfulResponse extends AbstractResponse
     private $result;
 
     /**
-     * @param int|string|null $id
-     * @param mixed           $result
+     * @param mixed $result
      */
     public function __construct(
-        string $version,
-        $id,
+        JsonRpcVersion $version,
+        ?JsonRpcCallId $id,
         $result
     ) {
         $this->result = $result;

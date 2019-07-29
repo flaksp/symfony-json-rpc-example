@@ -9,13 +9,15 @@ use App\Serializer\Exception\DeserializationFailure;
 use App\Validator\ConstraintViolation\ConstraintViolationInterface;
 use App\Validator\ConstraintViolation\ValueIsNotValid;
 use App\Validator\ConstraintViolation\WrongPropertyType;
+use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Exception\LogicException;
 use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class JsonRpcVersionSerializer implements DenormalizerInterface, DenormalizerAwareInterface, CacheableSupportsMethodInterface
+class JsonRpcVersionSerializer implements DenormalizerInterface, DenormalizerAwareInterface, CacheableSupportsMethodInterface, NormalizerInterface
 {
     use DenormalizerAwareTrait;
 
@@ -55,8 +57,26 @@ class JsonRpcVersionSerializer implements DenormalizerInterface, DenormalizerAwa
         return __CLASS__ === get_class($this);
     }
 
+    /**
+     * @param JsonRpcVersion $object
+     * @param mixed|null     $format
+     */
+    public function normalize($object, $format = null, array $context = []): string
+    {
+        if ($this->supportsNormalization($object, $format) === false) {
+            throw new InvalidArgumentException();
+        }
+
+        return $object->getVersion();
+    }
+
     public function supportsDenormalization($data, $type, $format = null)
     {
         return $type === JsonRpcVersion::class;
+    }
+
+    public function supportsNormalization($data, $format = null): bool
+    {
+        return $data instanceof JsonRpcVersion;
     }
 }

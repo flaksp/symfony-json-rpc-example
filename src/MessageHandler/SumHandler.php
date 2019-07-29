@@ -4,23 +4,13 @@ declare(strict_types=1);
 
 namespace App\MessageHandler;
 
-use App\JsonRpc\ProcedureCall;
-use App\JsonRpc\Response\AbstractResponse;
+use App\Message\Sum;
 
 class SumHandler
 {
     public function __invoke(
-        ProcedureCall $procedureCall
-    ): AbstractResponse {
-        if ($procedureCall->getMethod() !== 'sum') {
-            return;
-        }
-
-        $parameters = $procedureCall->getParameters();
-
-        $a = $parameters['a'];
-        $b = $parameters['b'];
-
-        return $a + $b;
+        Sum $sum
+    ): int {
+        return $sum->getA() + $sum->getB();
     }
 }

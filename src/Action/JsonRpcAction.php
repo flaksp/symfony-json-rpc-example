@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Action;
 
 use App\JsonRpc\Error;
+use App\JsonRpc\JsonRpcVersion;
 use App\JsonRpc\ProcedureCall;
-use App\JsonRpc\ProcedureCallHandler;
+use App\JsonRpc\ProcedureCallProcessor;
 use App\JsonRpc\Response\ErrorResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,9 +22,9 @@ class JsonRpcAction
     public const ROUTE = __CLASS__;
 
     /**
-     * @var ProcedureCallHandler
+     * @var ProcedureCallProcessor
      */
-    private $procedureCallHandler;
+    private $procedureCallProcessor;
 
     /**
      * @var RequestStack
@@ -37,12 +38,12 @@ class JsonRpcAction
 
     public function __construct(
         RequestStack $requestStack,
-        SerializerInterface $serializer
-//        ProcedureCallHandler $procedureCallHandler
+        SerializerInterface $serializer,
+        ProcedureCallProcessor $procedureCallProcessor
     ) {
         $this->requestStack = $requestStack;
         $this->serializer = $serializer;
-//        $this->procedureCallHandler = $procedureCallHandler;
+        $this->procedureCallProcessor = $procedureCallProcessor;
     }
 
     /**
@@ -70,7 +71,7 @@ class JsonRpcAction
             return new Response(
                 $this->serializer->serialize(
                     new ErrorResponse(
-                        '2.0',
+                        new JsonRpcVersion('2.0'),
                         null,
                         new Error(
                             Error::CODE_PARSE_ERROR,
@@ -91,13 +92,16 @@ class JsonRpcAction
         $procedureCall = $this->serializer->deserialize(
             $json,
             ProcedureCall::class,
-            JsonEncoder::FORMAT
+            JsonEncoder::FORMAT,
+            [
+                'propertyPath' => [],
+            ]
         );
 
         if (is_array($procedureCall)) {
-            $response = $this->procedureCallHandler->handleBatch($procedureCall);
+            $response = $this->procedureCallProcessor->processBatch($procedureCall);
         } else {
-            $response = $this->procedureCallHandler->handle($procedureCall);
+            $response = $this->procedureCallProcessor->process($procedureCall);
         }
 
         $procedureResponse = $this->serializer->serialize(

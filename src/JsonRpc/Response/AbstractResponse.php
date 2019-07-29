@@ -4,38 +4,35 @@ declare(strict_types=1);
 
 namespace App\JsonRpc\Response;
 
+use App\JsonRpc\JsonRpcCallId;
+use App\JsonRpc\JsonRpcVersion;
+
 abstract class AbstractResponse
 {
     /**
-     * @var int|string|null
+     * @var JsonRpcCallId|null
      */
     private $id;
 
     /**
-     * @var string
+     * @var JsonRpcVersion
      */
     private $version;
 
-    /**
-     * @param int|string|null $id
-     */
     public function __construct(
-        string $version,
-        $id
+        JsonRpcVersion $version,
+        ?JsonRpcCallId $id
     ) {
         $this->version = $version;
         $this->id = $id;
     }
 
-    /**
-     * @return int|string|null
-     */
-    public function getId()
+    public function getId(): ?JsonRpcCallId
     {
         return $this->id;
     }
 
-    public function getVersion(): string
+    public function getVersion(): JsonRpcVersion
     {
         return $this->version;
     }
