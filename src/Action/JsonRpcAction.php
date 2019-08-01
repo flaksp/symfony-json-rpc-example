@@ -61,10 +61,6 @@ class JsonRpcAction
             throw new UnsupportedMediaTypeHttpException();
         }
 
-        if ($request->headers->get('Accept') !== 'application/json') {
-            throw new NotAcceptableHttpException();
-        }
-
         $json = $request->getContent();
 
         if ($json === '') {
@@ -98,10 +94,26 @@ class JsonRpcAction
             ]
         );
 
+        $areAllProcedureCallsNotifications = true;
+
         if (is_array($procedureCall)) {
             $response = $this->procedureCallProcessor->processBatch($procedureCall);
+
+            foreach ($procedureCall as $procedureCallItem) {
+                if ($procedureCallItem->isNotification() === false) {
+                    $areAllProcedureCallsNotifications = false;
+
+                    break;
+                }
+            }
         } else {
             $response = $this->procedureCallProcessor->process($procedureCall);
+
+            $areAllProcedureCallsNotifications = $procedureCall->isNotification();
+        }
+
+        if ($areAllProcedureCallsNotifications === false && $request->headers->get('Accept') !== 'application/json') {
+            throw new NotAcceptableHttpException();
         }
 
         $procedureResponse = $this->serializer->serialize(

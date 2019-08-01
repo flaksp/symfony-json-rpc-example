@@ -11,6 +11,46 @@ use Symfony\Component\HttpFoundation\Response;
 class JsonRpcActionTest extends WebTestCase
 {
     /**
+     * @group jsonrpc
+     */
+    public function testInvalidNotificationRequest(): void
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/jsonrpc',
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+            ],
+            json_encode([
+                'jsonrpc' => '2.0',
+                'method' => 'sum',
+                'params' => [
+                    'a' => [],
+                    'b' => 2,
+                ],
+            ])
+        );
+
+        self::assertEquals(
+            Response::HTTP_OK,
+            $client->getResponse()->getStatusCode()
+        );
+
+        self::assertFalse(
+            $client->getResponse()->headers->has('Content-Type')
+        );
+
+        self::assertEquals(
+            '',
+            $client->getResponse()->getContent()
+        );
+    }
+
+    /**
      * @group apiproblem
      * @group jsonrpc
      */
@@ -146,6 +186,220 @@ class JsonRpcActionTest extends WebTestCase
                     'message' => 'Parse error',
                 ],
             ]),
+            $client->getResponse()->getContent()
+        );
+    }
+
+    /**
+     * @group jsonrpc
+     */
+    public function testSuccessfulBatchRequest(): void
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/jsonrpc',
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_ACCEPT' => 'application/json',
+            ],
+            json_encode([
+                [
+                    'jsonrpc' => '2.0',
+                    'id' => 1,
+                    'method' => 'sum',
+                    'params' => [
+                        'a' => 1,
+                        'b' => 2,
+                    ],
+                ],
+                [
+                    'jsonrpc' => '2.0',
+                    'id' => 2,
+                    'method' => 'sum',
+                    'params' => [
+                        'a' => 1,
+                        'b' => 2,
+                    ],
+                ],
+            ])
+        );
+
+        self::assertEquals(
+            Response::HTTP_OK,
+            $client->getResponse()->getStatusCode()
+        );
+
+        self::assertEquals(
+            'application/json',
+            $client->getResponse()->headers->get('Content-Type')
+        );
+
+        self::assertJsonStringEqualsJsonString(
+            json_encode([
+                [
+                    'jsonrpc' => '2.0',
+                    'id' => 1,
+                    'result' => 3,
+                ],
+                [
+                    'jsonrpc' => '2.0',
+                    'id' => 2,
+                    'result' => 3,
+                ],
+            ]),
+            $client->getResponse()->getContent()
+        );
+    }
+
+    /**
+     * @group jsonrpc
+     */
+    public function testSuccessfulBatchRequestRegularAndNotification(): void
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/jsonrpc',
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_ACCEPT' => 'application/json',
+            ],
+            json_encode([
+                [
+                    'jsonrpc' => '2.0',
+                    'id' => 1,
+                    'method' => 'sum',
+                    'params' => [
+                        'a' => 1,
+                        'b' => 2,
+                    ],
+                ],
+                [
+                    'jsonrpc' => '2.0',
+                    'method' => 'sum',
+                    'params' => [
+                        'a' => 1,
+                        'b' => 2,
+                    ],
+                ],
+            ])
+        );
+
+        self::assertEquals(
+            Response::HTTP_OK,
+            $client->getResponse()->getStatusCode()
+        );
+
+        self::assertEquals(
+            'application/json',
+            $client->getResponse()->headers->get('Content-Type')
+        );
+
+        self::assertJsonStringEqualsJsonString(
+            json_encode([
+                [
+                    'jsonrpc' => '2.0',
+                    'id' => 1,
+                    'result' => 3,
+                ],
+            ]),
+            $client->getResponse()->getContent()
+        );
+    }
+
+    /**
+     * @group jsonrpc
+     */
+    public function testSuccessfulNotificationBatchRequest(): void
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/jsonrpc',
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+            ],
+            json_encode([
+                [
+                    'jsonrpc' => '2.0',
+                    'method' => 'sum',
+                    'params' => [
+                        'a' => 1,
+                        'b' => 2,
+                    ],
+                ],
+                [
+                    'jsonrpc' => '2.0',
+                    'method' => 'sum',
+                    'params' => [
+                        'a' => 1,
+                        'b' => 2,
+                    ],
+                ],
+            ])
+        );
+
+        self::assertEquals(
+            Response::HTTP_OK,
+            $client->getResponse()->getStatusCode()
+        );
+
+        self::assertFalse(
+            $client->getResponse()->headers->has('Content-Type')
+        );
+
+        self::assertEquals(
+            '',
+            $client->getResponse()->getContent()
+        );
+    }
+
+    /**
+     * @group jsonrpc
+     */
+    public function testSuccessfulNotificationRequest(): void
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/jsonrpc',
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+            ],
+            json_encode([
+                'jsonrpc' => '2.0',
+                'method' => 'sum',
+                'params' => [
+                    'a' => 1,
+                    'b' => 2,
+                ],
+            ])
+        );
+
+        self::assertEquals(
+            Response::HTTP_OK,
+            $client->getResponse()->getStatusCode()
+        );
+
+        self::assertFalse(
+            $client->getResponse()->headers->has('Content-Type')
+        );
+
+        self::assertEquals(
+            '',
             $client->getResponse()->getContent()
         );
     }

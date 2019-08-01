@@ -63,4 +63,9 @@ class ProcedureCall
     {
         return $this->version;
     }
+
+    public function isNotification(): bool
+    {
+        return $this->getId() === null;
+    }
 }
