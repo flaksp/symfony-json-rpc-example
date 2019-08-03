@@ -39,7 +39,7 @@ class ProcedureCallProcessor
     ): AbstractResponse {
 //        try {
         $result = $this->handle(
-                $this->serializer->deserialize(
+            $this->serializer->deserialize(
                     json_encode($procedureCall->getParameters()),
                     JsonRpcMethod::getMessageClassByMethodName($procedureCall->getMethod()->getName()),
                     JsonEncoder::FORMAT,
@@ -50,9 +50,9 @@ class ProcedureCallProcessor
             );
 
         $response = new SuccessfulResponse(
-                $procedureCall->getVersion(),
-                $procedureCall->getId(),
-                $result
+            $procedureCall->getVersion(),
+            $procedureCall->getId(),
+            $result
             );
 //        } catch (\Exception $e) { // TODO: Replace with real exception!
 //            $response = new ErrorResponse(

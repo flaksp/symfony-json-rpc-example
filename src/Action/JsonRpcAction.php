@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Action;
 
 use App\JsonRpc\Error;
+use App\JsonRpc\Exception\InvalidMethodParametersException;
+use App\JsonRpc\Exception\ParseErrorException;
 use App\JsonRpc\JsonRpcVersion;
 use App\JsonRpc\ProcedureCall;
 use App\JsonRpc\ProcedureCallProcessor;
 use App\JsonRpc\Response\ErrorResponse;
+use App\Serializer\Exception\DeserializationFailure;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
@@ -84,29 +87,49 @@ class JsonRpcAction
             );
         }
 
-        /** @var ProcedureCall|ProcedureCall[] $procedureCall */
-        $procedureCall = $this->serializer->deserialize(
-            $json,
-            ProcedureCall::class,
-            JsonEncoder::FORMAT,
-            [
-                'propertyPath' => [],
-            ]
-        );
+        try {
+            $parsedJson = json_decode($json, false, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw new ParseErrorException();
+        }
 
         $areAllProcedureCallsNotifications = true;
 
-        if (is_array($procedureCall)) {
-            $response = $this->procedureCallProcessor->processBatch($procedureCall);
+        if (is_array($parsedJson)) {
+            try {
+                /** @var ProcedureCall[] $procedureCalls */
+                $procedureCalls = $this->serializer->deserialize(
+                    $json,
+                    ProcedureCall::class . '[]',
+                    JsonEncoder::FORMAT,
+                    [
+                        'propertyPath' => [],
+                    ]
+                );
+            } catch (DeserializationFailure $e) {
+                throw new InvalidMethodParametersException($e->getConstraintViolations());
+            }
 
-            foreach ($procedureCall as $procedureCallItem) {
-                if ($procedureCallItem->isNotification() === false) {
+            $response = $this->procedureCallProcessor->processBatch($procedureCalls);
+
+            foreach ($procedureCalls as $procedureCall) {
+                if ($procedureCall->isNotification() === false) {
                     $areAllProcedureCallsNotifications = false;
 
                     break;
                 }
             }
         } else {
+            /** @var ProcedureCall $procedureCall */
+            $procedureCall = $this->serializer->deserialize(
+                $json,
+                ProcedureCall::class,
+                JsonEncoder::FORMAT,
+                [
+                    'propertyPath' => [],
+                ]
+            );
+
             $response = $this->procedureCallProcessor->process($procedureCall);
 
             $areAllProcedureCallsNotifications = $procedureCall->isNotification();

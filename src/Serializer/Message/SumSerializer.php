@@ -7,6 +7,7 @@ namespace App\Serializer\Message;
 use App\Message\Sum;
 use App\Serializer\Exception\DeserializationFailure;
 use App\Validator\ConstraintViolation\MandatoryFieldMissing;
+use App\Validator\ConstraintViolation\WrongPropertyType;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Exception\LogicException;
 use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
@@ -28,14 +29,30 @@ class SumSerializer implements DenormalizerInterface, DenormalizerAwareInterface
 
         if (array_key_exists('a', $data) === false) {
             $violations[] = new MandatoryFieldMissing(
-                $context + ['a']
+                $context['propertyPath'] + ['a']
             );
+        } else {
+            if (is_int($data['a']) === false) {
+                $violations[] = new WrongPropertyType(
+                    $context['propertyPath'] + ['a'],
+                    gettype($data['a']),
+                    ['integer', 'float']
+                );
+            }
         }
 
         if (array_key_exists('b', $data) === false) {
             $violations[] = new MandatoryFieldMissing(
-                'b'
+                $context['propertyPath'] + ['b']
             );
+        } else {
+            if (is_int($data['b']) === false) {
+                $violations[] = new WrongPropertyType(
+                    $context['propertyPath'] + ['b'],
+                    gettype($data['b']),
+                    ['integer', 'float']
+                );
+            }
         }
 
         if (count($violations) > 0) {
