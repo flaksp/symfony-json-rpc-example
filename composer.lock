@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "42d0dd381e6ec3cec04bfb12650b2901",
+    "content-hash": "c8db9314c0d06675368de8f5121e8fcc",
     "packages": [
         {
             "name": "psr/cache",
@@ -3017,8 +3017,8 @@
             "authors": [
                 {
                     "name": "Sebastian Bergmann",
-                    "role": "lead",
-                    "email": "sebastian@phpunit.de"
+                    "email": "sebastian@phpunit.de",
+                    "role": "lead"
                 }
             ],
             "description": "The PHP Unit Testing framework.",
@@ -4081,7 +4081,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.3",
+        "php": "7.3.*",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-json": "*"
