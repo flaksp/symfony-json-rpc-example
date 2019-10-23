@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Action;
 
 use App\JsonRpc\Error;
-use App\JsonRpc\Exception\InvalidMethodParametersException;
-use App\JsonRpc\Exception\ParseErrorException;
 use App\JsonRpc\JsonRpcVersion;
 use App\JsonRpc\ProcedureCall;
 use App\JsonRpc\ProcedureCallProcessor;
@@ -49,6 +47,68 @@ class JsonRpcAction
         $this->requestStack = $requestStack;
         $this->serializer = $serializer;
         $this->procedureCallProcessor = $procedureCallProcessor;
+    }
+
+    /**
+     * @param ConstraintViolationInterface[]
+     */
+    private function getInvalidRequestResponse(array $constraintViolations): Response
+    {
+        $responseBody = $this->serializer->serialize(
+            new ErrorResponse(
+                new JsonRpcVersion('2.0'),
+                null,
+                new Error(
+                    Error::CODE_INVALID_REQUEST,
+                    'Invalid Request',
+                    $constraintViolations
+                )
+            ),
+            JsonEncoder::FORMAT
+        );
+
+        return new Response(
+            $responseBody,
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'application/json',
+                'Content-Length' => mb_strlen($responseBody, '8bit'),
+            ]
+        );
+    }
+
+    private function getNotificationResponse(): Response
+    {
+        return new Response(
+            '',
+            Response::HTTP_OK,
+            []
+        );
+    }
+
+    private function getParseErrorResponse(string $message): Response
+    {
+        $responseBody = $this->serializer->serialize(
+            new ErrorResponse(
+                new JsonRpcVersion('2.0'),
+                null,
+                new Error(
+                    Error::CODE_PARSE_ERROR,
+                    $message,
+                    null
+                )
+            ),
+            JsonEncoder::FORMAT
+        );
+
+        return new Response(
+            $responseBody,
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'application/json',
+                'Content-Length' => mb_strlen($responseBody, '8bit'),
+            ]
+        );
     }
 
     /**
@@ -110,68 +170,6 @@ class JsonRpcAction
                 'Content-Type' => 'application/json',
                 'Content-Length' => mb_strlen($procedureResponse, '8bit'),
             ]
-        );
-    }
-
-    private function getParseErrorResponse(string $message): Response
-    {
-        $responseBody = $this->serializer->serialize(
-            new ErrorResponse(
-                new JsonRpcVersion('2.0'),
-                null,
-                new Error(
-                    Error::CODE_PARSE_ERROR,
-                    $message,
-                    null
-                )
-            ),
-            JsonEncoder::FORMAT
-        );
-
-        return new Response(
-            $responseBody,
-            Response::HTTP_OK,
-            [
-                'Content-Type' => 'application/json',
-                'Content-Length' => mb_strlen($responseBody, '8bit'),
-            ]
-        );
-    }
-
-    /**
-     * @param ConstraintViolationInterface[]
-     */
-    private function getInvalidRequestResponse(array $constraintViolations): Response
-    {
-        $responseBody = $this->serializer->serialize(
-            new ErrorResponse(
-                new JsonRpcVersion('2.0'),
-                null,
-                new Error(
-                    Error::CODE_INVALID_REQUEST,
-                    'Invalid Request',
-                    $constraintViolations
-                )
-            ),
-            JsonEncoder::FORMAT
-        );
-
-        return new Response(
-            $responseBody,
-            Response::HTTP_OK,
-            [
-                'Content-Type' => 'application/json',
-                'Content-Length' => mb_strlen($responseBody, '8bit'),
-            ]
-        );
-    }
-
-    private function getNotificationResponse(): Response
-    {
-        return new Response(
-            '',
-            Response::HTTP_OK,
-            []
         );
     }
 }

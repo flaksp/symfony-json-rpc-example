@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\EventListener;
 
 use App\ApiProblem\ApiProblem;
-use App\JsonRpc\Exception\ParseErrorException;
-use App\JsonRpc\Response\ErrorResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;

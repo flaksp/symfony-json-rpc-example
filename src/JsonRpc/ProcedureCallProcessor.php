@@ -41,12 +41,12 @@ class ProcedureCallProcessor
         try {
             $result = $this->handle(
                 $this->serializer->deserialize(
-                        json_encode($procedureCall->getParameters()),
-                        JsonRpcMethod::getMessageClassByMethodName($procedureCall->getMethod()->getName()),
-                        JsonEncoder::FORMAT,
-                        [
-                            'propertyPath' => ['params'],
-                        ]
+                    json_encode($procedureCall->getParameters()),
+                    JsonRpcMethod::getMessageClassByMethodName($procedureCall->getMethod()->getName()),
+                    JsonEncoder::FORMAT,
+                    [
+                        'propertyPath' => ['params'],
+                    ]
                     )
                 );
 

@@ -13,6 +13,48 @@ class JsonRpcActionTest extends WebTestCase
     /**
      * @group jsonrpc
      */
+    public function testEmptyRequest(): void
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/jsonrpc',
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_ACCEPT' => 'application/json',
+            ],
+            ''
+        );
+
+        self::assertEquals(
+            Response::HTTP_OK,
+            $client->getResponse()->getStatusCode()
+        );
+
+        self::assertEquals(
+            'application/json',
+            $client->getResponse()->headers->get('Content-Type')
+        );
+
+        self::assertJsonStringEqualsJsonString(
+            json_encode([
+                'jsonrpc' => '2.0',
+                'id' => null,
+                'error' => [
+                    'code' => Error::CODE_PARSE_ERROR,
+                    'message' => 'Request body is empty',
+                ],
+            ]),
+            $client->getResponse()->getContent()
+        );
+    }
+
+    /**
+     * @group jsonrpc
+     */
     public function testInvalidNotificationRequest(): void
     {
         $client = static::createClient();
@@ -46,150 +88,6 @@ class JsonRpcActionTest extends WebTestCase
 
         self::assertEquals(
             '',
-            $client->getResponse()->getContent()
-        );
-    }
-
-    /**
-     * @group jsonrpc
-     */
-    public function testRequestWithInvalidParams(): void
-    {
-        $client = static::createClient();
-
-        $client->request(
-            'POST',
-            '/jsonrpc',
-            [],
-            [],
-            [
-                'CONTENT_TYPE' => 'application/json',
-                'HTTP_ACCEPT' => 'application/json',
-            ],
-            json_encode([
-                'jsonrpc' => '2.0',
-                'id' => 1,
-                'method' => 'sum',
-                'params' => [
-                    'a' => [],
-                    'b' => 2,
-                ],
-            ])
-        );
-
-        self::assertEquals(
-            Response::HTTP_OK,
-            $client->getResponse()->getStatusCode()
-        );
-
-        self::assertTrue(
-            $client->getResponse()->headers->has('Content-Type')
-        );
-
-        self::assertJsonStringEqualsJsonString(
-            json_encode([
-                'id' => 1,
-                'jsonrpc' => '2.0',
-                'error' => [
-                    'code' => -32602,
-                    'message' => 'Invalid method parameters',
-                    'data' => [
-                        [
-                            'type' => 'wrong_property_type',
-                            'description' => 'Property "#/params/a" is array type, but only following types are allowed: integer, float.',
-                            'parameters' => [
-                                [
-                                    'name' => 'givenType',
-                                    'value' => 'array',
-                                ],
-                                [
-                                    'name' => 'allowedTypes',
-                                    'value' => [
-                                        'integer',
-                                        'float',
-                                    ],
-                                ],
-                            ],
-                            'pointer' => '#/params/a',
-                        ],
-                    ],
-                ],
-            ]),
-            $client->getResponse()->getContent()
-        );
-    }
-
-    /**
-     * @group jsonrpc
-     */
-    public function testRequestWithInvalidJsonRpcFields(): void
-    {
-        $client = static::createClient();
-
-        $client->request(
-            'POST',
-            '/jsonrpc',
-            [],
-            [],
-            [
-                'CONTENT_TYPE' => 'application/json',
-                'HTTP_ACCEPT' => 'application/json',
-            ],
-            json_encode([
-                'jsonrpc' => '3.0',
-                'id' => [],
-                'method' => 'sum',
-                'params' => [
-                    'a' => 1,
-                    'b' => 2,
-                ],
-            ])
-        );
-
-        self::assertEquals(
-            Response::HTTP_OK,
-            $client->getResponse()->getStatusCode()
-        );
-
-        self::assertTrue(
-            $client->getResponse()->headers->has('Content-Type')
-        );
-
-        self::assertJsonStringEqualsJsonString(
-            json_encode([
-                'id' => null,
-                'jsonrpc' => '2.0',
-                'error' => [
-                    'code' => -32600,
-                    'message' => 'Invalid Request',
-                    'data' => [
-                        [
-                            'type' => 'value_is_not_valid',
-                            'description' => 'Property "#/jsonrpc" is not valid. JSON RPC version should be explicitly specified as described in specification: https://www.jsonrpc.org/specification. At this moment server supports only version "2.0".',
-                            'parameters' => [],
-                            'pointer' => '#/jsonrpc',
-                        ],
-                        [
-                            'type' => 'wrong_property_type',
-                            'description' => 'Property "#/id" is array type, but only following types are allowed: string, integer.',
-                            'parameters' => [
-                                [
-                                    'name' => 'givenType',
-                                    'value' => 'array',
-                                ],
-                                [
-                                    'name' => 'allowedTypes',
-                                    'value' => [
-                                        'string',
-                                        'integer',
-                                    ],
-                                ],
-                            ],
-                            'pointer' => '#/id',
-                        ],
-                    ],
-                ],
-            ]),
             $client->getResponse()->getContent()
         );
     }
@@ -295,7 +193,7 @@ class JsonRpcActionTest extends WebTestCase
     /**
      * @group jsonrpc
      */
-    public function testEmptyRequest(): void
+    public function testRequestWithInvalidJsonRpcFields(): void
     {
         $client = static::createClient();
 
@@ -308,7 +206,15 @@ class JsonRpcActionTest extends WebTestCase
                 'CONTENT_TYPE' => 'application/json',
                 'HTTP_ACCEPT' => 'application/json',
             ],
-            ''
+            json_encode([
+                'jsonrpc' => '3.0',
+                'id' => [],
+                'method' => 'sum',
+                'params' => [
+                    'a' => 1,
+                    'b' => 2,
+                ],
+            ])
         );
 
         self::assertEquals(
@@ -316,18 +222,112 @@ class JsonRpcActionTest extends WebTestCase
             $client->getResponse()->getStatusCode()
         );
 
-        self::assertEquals(
-            'application/json',
-            $client->getResponse()->headers->get('Content-Type')
+        self::assertTrue(
+            $client->getResponse()->headers->has('Content-Type')
         );
 
         self::assertJsonStringEqualsJsonString(
             json_encode([
-                'jsonrpc' => '2.0',
                 'id' => null,
+                'jsonrpc' => '2.0',
                 'error' => [
-                    'code' => Error::CODE_PARSE_ERROR,
-                    'message' => 'Request body is empty',
+                    'code' => -32600,
+                    'message' => 'Invalid Request',
+                    'data' => [
+                        [
+                            'type' => 'value_is_not_valid',
+                            'description' => 'Property "#/jsonrpc" is not valid. JSON RPC version should be explicitly specified as described in specification: https://www.jsonrpc.org/specification. At this moment server supports only version "2.0".',
+                            'parameters' => [],
+                            'pointer' => '#/jsonrpc',
+                        ],
+                        [
+                            'type' => 'wrong_property_type',
+                            'description' => 'Property "#/id" is array type, but only following types are allowed: string, integer.',
+                            'parameters' => [
+                                [
+                                    'name' => 'givenType',
+                                    'value' => 'array',
+                                ],
+                                [
+                                    'name' => 'allowedTypes',
+                                    'value' => [
+                                        'string',
+                                        'integer',
+                                    ],
+                                ],
+                            ],
+                            'pointer' => '#/id',
+                        ],
+                    ],
+                ],
+            ]),
+            $client->getResponse()->getContent()
+        );
+    }
+
+    /**
+     * @group jsonrpc
+     */
+    public function testRequestWithInvalidParams(): void
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/jsonrpc',
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_ACCEPT' => 'application/json',
+            ],
+            json_encode([
+                'jsonrpc' => '2.0',
+                'id' => 1,
+                'method' => 'sum',
+                'params' => [
+                    'a' => [],
+                    'b' => 2,
+                ],
+            ])
+        );
+
+        self::assertEquals(
+            Response::HTTP_OK,
+            $client->getResponse()->getStatusCode()
+        );
+
+        self::assertTrue(
+            $client->getResponse()->headers->has('Content-Type')
+        );
+
+        self::assertJsonStringEqualsJsonString(
+            json_encode([
+                'id' => 1,
+                'jsonrpc' => '2.0',
+                'error' => [
+                    'code' => -32602,
+                    'message' => 'Invalid method parameters',
+                    'data' => [
+                        [
+                            'type' => 'wrong_property_type',
+                            'description' => 'Property "#/params/a" is array type, but only following types are allowed: integer, float.',
+                            'parameters' => [
+                                [
+                                    'name' => 'givenType',
+                                    'value' => 'array',
+                                ],
+                                [
+                                    'name' => 'allowedTypes',
+                                    'value' => [
+                                        'integer',
+                                        'float',
+                                    ],
+                                ],
+                            ],
+                            'pointer' => '#/params/a',
+                        ],
+                    ],
                 ],
             ]),
             $client->getResponse()->getContent()
