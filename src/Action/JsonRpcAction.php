@@ -12,12 +12,14 @@ use App\JsonRpc\ProcedureCall;
 use App\JsonRpc\ProcedureCallProcessor;
 use App\JsonRpc\Response\ErrorResponse;
 use App\Serializer\Exception\DeserializationFailure;
+use App\Validator\ConstraintViolation\ConstraintViolationInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
 use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class JsonRpcAction
@@ -67,59 +69,10 @@ class JsonRpcAction
         $json = $request->getContent();
 
         if ($json === '') {
-            return new Response(
-                $this->serializer->serialize(
-                    new ErrorResponse(
-                        new JsonRpcVersion('2.0'),
-                        null,
-                        new Error(
-                            Error::CODE_PARSE_ERROR,
-                            'Parse error',
-                            null
-                        )
-                    ),
-                    JsonEncoder::FORMAT
-                ),
-                Response::HTTP_OK,
-                [
-                    'Content-Type' => 'application/json',
-                ]
-            );
+            return $this->getParseErrorResponse('Request body is empty');
         }
 
         try {
-            $parsedJson = json_decode($json, false, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            throw new ParseErrorException();
-        }
-
-        $areAllProcedureCallsNotifications = true;
-
-        if (is_array($parsedJson)) {
-            try {
-                /** @var ProcedureCall[] $procedureCalls */
-                $procedureCalls = $this->serializer->deserialize(
-                    $json,
-                    ProcedureCall::class . '[]',
-                    JsonEncoder::FORMAT,
-                    [
-                        'propertyPath' => [],
-                    ]
-                );
-            } catch (DeserializationFailure $e) {
-                throw new InvalidMethodParametersException($e->getConstraintViolations());
-            }
-
-            $response = $this->procedureCallProcessor->processBatch($procedureCalls);
-
-            foreach ($procedureCalls as $procedureCall) {
-                if ($procedureCall->isNotification() === false) {
-                    $areAllProcedureCallsNotifications = false;
-
-                    break;
-                }
-            }
-        } else {
             /** @var ProcedureCall $procedureCall */
             $procedureCall = $this->serializer->deserialize(
                 $json,
@@ -129,13 +82,19 @@ class JsonRpcAction
                     'propertyPath' => [],
                 ]
             );
-
-            $response = $this->procedureCallProcessor->process($procedureCall);
-
-            $areAllProcedureCallsNotifications = $procedureCall->isNotification();
+        } catch (NotEncodableValueException $e) {
+            return $this->getParseErrorResponse('Could not decode your JSON');
+        } catch (DeserializationFailure $e) {
+            return $this->getInvalidRequestResponse($e->getConstraintViolations());
         }
 
-        if ($areAllProcedureCallsNotifications === false && $request->headers->get('Accept') !== 'application/json') {
+        $response = $this->procedureCallProcessor->process($procedureCall);
+
+        if ($procedureCall->isNotification() === true) {
+            return $this->getNotificationResponse();
+        }
+
+        if ($request->headers->get('Accept') !== 'application/json') {
             throw new NotAcceptableHttpException();
         }
 
@@ -149,8 +108,70 @@ class JsonRpcAction
             Response::HTTP_OK,
             [
                 'Content-Type' => 'application/json',
-                'Content-Length' => mb_strlen($procedureResponse),
+                'Content-Length' => mb_strlen($procedureResponse, '8bit'),
             ]
+        );
+    }
+
+    private function getParseErrorResponse(string $message): Response
+    {
+        $responseBody = $this->serializer->serialize(
+            new ErrorResponse(
+                new JsonRpcVersion('2.0'),
+                null,
+                new Error(
+                    Error::CODE_PARSE_ERROR,
+                    $message,
+                    null
+                )
+            ),
+            JsonEncoder::FORMAT
+        );
+
+        return new Response(
+            $responseBody,
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'application/json',
+                'Content-Length' => mb_strlen($responseBody, '8bit'),
+            ]
+        );
+    }
+
+    /**
+     * @param ConstraintViolationInterface[]
+     */
+    private function getInvalidRequestResponse(array $constraintViolations): Response
+    {
+        $responseBody = $this->serializer->serialize(
+            new ErrorResponse(
+                new JsonRpcVersion('2.0'),
+                null,
+                new Error(
+                    Error::CODE_INVALID_REQUEST,
+                    'Invalid Request',
+                    $constraintViolations
+                )
+            ),
+            JsonEncoder::FORMAT
+        );
+
+        return new Response(
+            $responseBody,
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'application/json',
+                'Content-Length' => mb_strlen($responseBody, '8bit'),
+            ]
+        );
+    }
+
+    private function getNotificationResponse(): Response
+    {
+        return new Response(
+            '',
+            Response::HTTP_OK,
+            []
         );
     }
 }

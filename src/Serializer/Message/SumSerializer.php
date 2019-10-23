@@ -29,12 +29,12 @@ class SumSerializer implements DenormalizerInterface, DenormalizerAwareInterface
 
         if (array_key_exists('a', $data) === false) {
             $violations[] = new MandatoryFieldMissing(
-                $context['propertyPath'] + ['a']
+                array_merge($context['propertyPath'], ['a'])
             );
         } else {
             if (is_int($data['a']) === false) {
                 $violations[] = new WrongPropertyType(
-                    $context['propertyPath'] + ['a'],
+                    array_merge($context['propertyPath'], ['a']),
                     gettype($data['a']),
                     ['integer', 'float']
                 );
@@ -43,12 +43,12 @@ class SumSerializer implements DenormalizerInterface, DenormalizerAwareInterface
 
         if (array_key_exists('b', $data) === false) {
             $violations[] = new MandatoryFieldMissing(
-                $context['propertyPath'] + ['b']
+                array_merge($context['propertyPath'], ['b'])
             );
         } else {
             if (is_int($data['b']) === false) {
                 $violations[] = new WrongPropertyType(
-                    $context['propertyPath'] + ['b'],
+                    array_merge($context['propertyPath'], ['b']),
                     gettype($data['b']),
                     ['integer', 'float']
                 );

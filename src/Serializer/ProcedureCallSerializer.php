@@ -40,11 +40,11 @@ class ProcedureCallSerializer implements DenormalizerInterface, DenormalizerAwar
                     JsonRpcVersion::class,
                     $format,
                     [
-                        'propertyPath' => $context['propertyPath'] + ['jsonrpc'],
+                        'propertyPath' => array_merge($context['propertyPath'], ['jsonrpc']),
                     ]
                 );
             } catch (DeserializationFailure $e) {
-                $violations = $violations + $e->getConstraintViolations();
+                $violations = array_merge($violations, $e->getConstraintViolations());
             }
         }
 
@@ -59,11 +59,11 @@ class ProcedureCallSerializer implements DenormalizerInterface, DenormalizerAwar
                     JsonRpcMethod::class,
                     $format,
                     [
-                        'propertyPath' => $context['propertyPath'] + ['method'],
+                        'propertyPath' => array_merge($context['propertyPath'], ['method']),
                     ]
                 );
             } catch (DeserializationFailure $e) {
-                $violations = $violations + $e->getConstraintViolations();
+                $violations = array_merge($violations, $e->getConstraintViolations());
             }
         }
 
@@ -76,11 +76,11 @@ class ProcedureCallSerializer implements DenormalizerInterface, DenormalizerAwar
                     JsonRpcCallId::class,
                     $format,
                     [
-                        'propertyPath' => $context['propertyPath'] + ['id'],
+                        'propertyPath' => array_merge($context['propertyPath'], ['id']),
                     ]
                 );
             } catch (DeserializationFailure $e) {
-                $violations = $violations + $e->getConstraintViolations();
+                $violations = array_merge($violations, $e->getConstraintViolations());
             }
         }
 

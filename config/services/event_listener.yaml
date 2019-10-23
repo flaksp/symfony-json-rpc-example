@@ -4,6 +4,10 @@ services:
     autoconfigure: false
     public: false
 
+  App\EventListener\JsonRpcContentTypeRemover:
+    tags:
+    - { name: kernel.event_listener, event: kernel.response, priority: -100 }
+
   App\EventListener\ExceptionToErrorConverter:
     arguments:
     - '@serializer'
