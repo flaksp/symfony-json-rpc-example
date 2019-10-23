@@ -1,0 +1,27 @@
+name: Quality assurance
+
+on: push
+
+jobs:
+  composer:
+    name: Composer
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@master
+
+    - name: Install Composer dependencies
+      uses: docker://composer:1.9
+      with:
+        args: install --no-interaction --no-progress --optimize-autoloader --no-scripts --no-plugins --no-suggest --prefer-dist
+
+    - name: Lint with PHP-CS-Fixer
+      uses: docker://php:7.3-cli-alpine
+      with:
+        args: vendor/bin/php-cs-fixer fix --config=.php_cs --verbose --show-progress=dots --allow-risky=yes --dry-run
+
+    - name: Test with PHPUnit
+      uses: docker://php:7.3-cli-alpine
+      with:
+        args: vendor/bin/phpunit --configuration phpunit.xml
