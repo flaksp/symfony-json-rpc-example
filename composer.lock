@@ -1156,16 +1156,16 @@
         },
         {
             "name": "symfony/messenger",
-            "version": "v4.3.2",
+            "version": "v4.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/messenger.git",
-                "reference": "2ab44a7cdfe70db9dd9cc9c615e15a9b61652b1e"
+                "reference": "7b3b3290a06c80e81b2389a149f8a0031eff512a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/messenger/zipball/2ab44a7cdfe70db9dd9cc9c615e15a9b61652b1e",
-                "reference": "2ab44a7cdfe70db9dd9cc9c615e15a9b61652b1e",
+                "url": "https://api.github.com/repos/symfony/messenger/zipball/7b3b3290a06c80e81b2389a149f8a0031eff512a",
+                "reference": "7b3b3290a06c80e81b2389a149f8a0031eff512a",
                 "shasum": ""
             },
             "require": {
@@ -1177,7 +1177,7 @@
                 "symfony/event-dispatcher": "<4.3"
             },
             "require-dev": {
-                "doctrine/dbal": "^2.5",
+                "doctrine/dbal": "^2.6",
                 "psr/cache": "~1.0",
                 "symfony/console": "~3.4|~4.0",
                 "symfony/debug": "~4.1",
@@ -1216,17 +1216,17 @@
             ],
             "authors": [
                 {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                },
-                {
                     "name": "Samuel Roze",
                     "email": "samuel.roze@gmail.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
                 }
             ],
             "description": "Symfony Messenger Component",
             "homepage": "https://symfony.com",
-            "time": "2019-06-26T07:55:28+00:00"
+            "time": "2019-10-07T14:35:32+00:00"
         },
         {
             "name": "symfony/mime",
